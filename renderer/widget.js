@@ -35,8 +35,8 @@ var css = [
   '.dshwv-body{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:50% 100%;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}',
   '.dshwv-body.dshwv-shake{animation:dshwv-shake .55s linear}',
   '@keyframes dshwv-shake{0%,100%{transform:translate(0,0)}8%{transform:translate(-7px,4px)}16%{transform:translate(8px,-3px)}24%{transform:translate(-6px,-5px)}32%{transform:translate(7px,3px)}40%{transform:translate(-4px,6px)}48%{transform:translate(6px,-4px)}56%{transform:translate(-7px,2px)}64%{transform:translate(5px,5px)}72%{transform:translate(-3px,-6px)}80%{transform:translate(4px,3px)}88%{transform:translate(-5px,-2px)}}',
-  '.dshwv-img{position:absolute;right:0;bottom:0;width:59.45%;height:59.45%;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}',
-  '.dshwv-pet-canvas{position:absolute;right:0;bottom:0;width:59.45%;height:59.45%;display:none;pointer-events:none}',
+  '.dshwv-pet-canvas{position:absolute;right:0;bottom:0;width:59.45%;height:59.45%;display:none;pointer-events:none;z-index:1}',
+  '.dshwv-img{position:absolute;right:0;bottom:0;width:59.45%;height:59.45%;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;z-index:0}',
   '.dshwv-bubble{position:absolute;left:0;top:0;width:100%;aspect-ratio:1026/700;pointer-events:none;z-index:1;--dshw-u:calc(var(--dshw-base) / 1026)}',
   '.dshwv-bubble-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}',
   '.dshwv-bubble-art svg,.dshwv-bubble svg{display:block;width:100%;height:100%;pointer-events:none}',
@@ -149,7 +149,7 @@ img.src = IMG_URL
 img.alt = '余额'
 img.draggable = false
 var petCanvas = document.createElement('canvas')
-petCanvas.className = 'dshwv-pet-canvas'
+petCanvas.className = 'dshwv-pet-canvas pet-draw'
 petCanvas.width = 512
 petCanvas.height = 512
 
@@ -892,8 +892,8 @@ bubbleBox.addEventListener('click', function (e) {
 
 var body = document.createElement('div')
 body.className = 'dshwv-body'
-body.appendChild(petCanvas)
 body.appendChild(img)
+body.appendChild(petCanvas)
 body.appendChild(bubbleBox)
 root.appendChild(body)
 root.appendChild(menuBtn)

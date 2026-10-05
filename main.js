@@ -566,9 +566,94 @@ function createWindow() {
     })
     setTimeout(async () => {
       try {
-        const r = await win.webContents.executeJavaScript(
-          '({ api: !!window.whaleAPI, widget: !!window.__dshWhaleWidget, root: !!document.querySelector(".dshwv-root"), img: !!document.querySelector(".dshwv-img"), apiKeyInput: !!document.querySelector(".dshwv-secret") })'
-        )
+        const r = await win.webContents.executeJavaScript(`(async function () {
+          function sleep(ms) { return new Promise(function (ok) { setTimeout(ok, ms) }) }
+          function skinSelectEl() {
+            var sels = document.querySelectorAll('select.dshwv-sound')
+            for (var i = 0; i < sels.length; i++) {
+              var vals = [].map.call(sels[i].options, function (o) { return o.value })
+              if (vals.indexOf('plugtest') >= 0 || vals.indexOf('gpt') >= 0 || vals.indexOf('whale') >= 0) return sels[i]
+            }
+            return sels[sels.length - 1] || null
+          }
+          var sel = skinSelectEl()
+          var ids = sel ? [].map.call(sel.options, function (o) { return o.value }) : []
+          var original = sel ? sel.value : ''
+          var base = {
+            api: !!window.whaleAPI,
+            widget: !!window.__dshWhaleWidget,
+            root: !!document.querySelector('.dshwv-root'),
+            img: !!document.querySelector('.dshwv-img'),
+            skins: ids,
+            cspEval: false
+          }
+          try { (0, eval)('1') } catch (e) { base.cspEval = String(e && e.message || e) }
+          if (ids.indexOf('plugtest') < 0) {
+            base.pluginCheck = 'no-plugtest-skin'
+            return base
+          }
+          var other = ids.filter(function (id) { return id !== 'plugtest' })[0] || ''
+          sel.value = 'plugtest'
+          sel.dispatchEvent(new Event('change'))
+          await sleep(900)
+          var onPlug = {
+            mods: window.__zcModHost && window.__zcModHost.modCount ? window.__zcModHost.modCount() : -1,
+            owned: document.querySelectorAll('[data-zc-mod]').length,
+            flashBtn: [].some.call(document.querySelectorAll('button'), function (b) { return b.textContent.indexOf('触发闪光') >= 0 })
+          }
+          var flashBtn = [].find.call(document.querySelectorAll('button'), function (b) { return b.textContent.indexOf('触发闪光') >= 0 })
+          var modeBtn = [].find.call(document.querySelectorAll('button'), function (b) { return b.textContent.indexOf('切换粒子模式') >= 0 })
+          var hostMods = window.__zcModHost
+          var flashBefore = null
+          var flashAfter = null
+          var modeBefore = null
+          var modeAfter = null
+          try {
+            var modsRef = null
+            // probe via canvas draw side-effects: click and read toast / store
+            if (flashBtn) flashBtn.click()
+            await sleep(50)
+            var toast = document.querySelector('.zc-fx-toast')
+            onPlug.toastAfterFlash = toast ? toast.textContent : ''
+            onPlug.toastOn = !!(toast && toast.classList.contains('on'))
+            if (modeBtn) {
+              modeBefore = (localStorage.getItem('zcmod:plugtest:mode') || '')
+              modeBtn.click()
+              await sleep(50)
+              modeAfter = (localStorage.getItem('zcmod:plugtest:mode') || '')
+            }
+            onPlug.modeBefore = modeBefore
+            onPlug.modeAfter = modeAfter
+            onPlug.modeChanged = modeBefore !== modeAfter && !!modeAfter
+            // sample one frame of draw: canvas should be visible and non-empty-ish
+            var canvas = document.querySelector('.dshwv-pet-canvas')
+            var imgEl = document.querySelector('.dshwv-img')
+            onPlug.canvasDisplay = canvas ? canvas.style.display : ''
+            onPlug.canvasOnTop = !!(canvas && imgEl && (canvas.compareDocumentPosition(imgEl) & Node.DOCUMENT_POSITION_PRECEDING))
+          } catch (err) {
+            onPlug.probeErr = String(err && err.message || err)
+          }
+          if (other) {
+            sel.value = other
+            sel.dispatchEvent(new Event('change'))
+            await sleep(900)
+          }
+          var after = {
+            skin: sel.value,
+            mods: window.__zcModHost && window.__zcModHost.modCount ? window.__zcModHost.modCount() : -1,
+            owned: document.querySelectorAll('[data-zc-mod]').length,
+            flashBtn: [].some.call(document.querySelectorAll('button'), function (b) { return b.textContent.indexOf('触发闪光') >= 0 })
+          }
+          base.onPlugtest = onPlug
+          base.afterSwitch = after
+          base.leaked = !!(after.flashBtn || after.mods > 0)
+          if (original && sel.value !== original) {
+            sel.value = original
+            sel.dispatchEvent(new Event('change'))
+            await sleep(400)
+          }
+          return base
+        })()`)
         console.log('SMOKE RENDERER: ' + JSON.stringify(r))
       } catch (err) {
         console.log('SMOKE RENDERER ERROR: ' + err.message)
