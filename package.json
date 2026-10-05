@@ -8,6 +8,7 @@
   "contributors": [],
   "license": "MIT",
   "scripts": {
+    "start": "electron .",
     "pack:skins": "node scripts/pack-skins.mjs",
     "inject:skin-sounds": "node scripts/inject-skin-sounds.mjs",
     "dist": "node scripts/prepare-electron.mjs && electron-builder --win portable -c.electronDist=build/electron-dist",
