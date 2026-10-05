@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: skin:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>burst</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent !important;
+      overflow: hidden;
+      cursor: default;
+    }
+    .wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+    img {
+      max-width: 100vw;
+      max-height: 100vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 12px 36px rgba(0, 0, 0, 0.35));
+      animation: pop .22s cubic-bezier(.34, 1.56, .64, 1);
+    }
+    @keyframes pop {
+      from { transform: scale(.92); opacity: .6; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img id="img" alt="">
+  </div>
+  <script>
+    ;(function () {
+      document.addEventListener('mousedown', function () {
+        if (window.whaleAPI && window.whaleAPI.closeBurst) window.whaleAPI.closeBurst()
+      })
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && window.whaleAPI && window.whaleAPI.closeBurst) window.whaleAPI.closeBurst()
+      })
+    })()
+  </script>
+</body>
+</html>

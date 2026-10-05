@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.log
+.npm-cache/
+.env
+.env.*
+userdata.json
+build/electron-dist/
+skin-studio/

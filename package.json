@@ -1,0 +1,73 @@
+{
+  "name": "zc-desktop-pet",
+  "version": "1.0.1",
+  "description": "ZC桌宠",
+  "main": "main.js",
+  "private": true,
+  "author": "qule12345",
+  "contributors": [],
+  "license": "MIT",
+  "scripts": {
+    "pack:skins": "node scripts/pack-skins.mjs",
+    "inject:skin-sounds": "node scripts/inject-skin-sounds.mjs",
+    "dist": "node scripts/prepare-electron.mjs && electron-builder --win portable -c.electronDist=build/electron-dist",
+    "dist:win": "node scripts/prepare-electron.mjs && electron-builder --win -c.electronDist=build/electron-dist",
+    "dist:mac": "electron-builder --mac zip --x64 --arm64",
+    "dist:mac:dmg": "electron-builder --mac dmg --x64 --arm64",
+    "dist:all": "node scripts/prepare-electron.mjs && electron-builder --win portable -c.electronDist=build/electron-dist && electron-builder --mac zip --x64 --arm64"
+  },
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.2"
+  },
+  "build": {
+    "appId": "com.qule12345.zcpet",
+    "productName": "ZC桌宠",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**/*",
+      "renderer/**/*",
+      "build/icon.ico",
+      "build/icon.icns",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "renderer/assets/skins/**",
+      "build/icon.ico"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "artifactName": "ZC桌宠_${version}_mac_${arch}.${ext}",
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "portable": {
+      "artifactName": "ZC桌宠_${version}_win_x64.${ext}"
+    },
+    "npmRebuild": false
+  }
+}

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+  <title>Key 列表</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --line: #e3e8ef;
+      --text: #1c2430;
+      --muted: #6a7686;
+      --accent: #2f6fed;
+      --accent-soft: rgba(47, 111, 237, 0.1);
+      --ok: #1f9d57;
+      --err: #d64545;
+      --warn: #c47d12;
+      --radius: 12px;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 10px 28px rgba(16, 24, 40, 0.06);
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+    body { display: flex; flex-direction: column; min-height: 100%; }
+    .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #f7f9fc);
+    }
+    .top h1 { margin: 0; font-size: 18px; font-weight: 750; }
+    .top p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid #d0d7e2;
+      border-radius: 9px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #f5f7fa; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.05); background: var(--accent); }
+    .btn-sm {
+      border: 1px solid #d0d7e2;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+      padding: 5px 9px;
+      cursor: pointer;
+    }
+    .btn-sm:hover { background: #f5f7fa; }
+    .btn-sm:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-sm.primary { background: var(--accent-soft); border-color: rgba(47,111,237,.35); color: var(--accent); }
+    .btn-sm.danger { color: var(--err); border-color: rgba(214,69,69,.35); background: rgba(214,69,69,.06); }
+    .wrap {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+      gap: 16px;
+      padding: 16px 20px 20px;
+      min-height: 0;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .panel-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      flex: 0 0 auto;
+    }
+    .panel-hd h2 { margin: 0; font-size: 14px; font-weight: 700; }
+    .panel-hd span { font-size: 12px; color: var(--muted); }
+    .list {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fbfcfe;
+      min-height: 360px;
+    }
+    .empty {
+      margin: auto;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 28px;
+      line-height: 1.5;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .card:hover { border-color: #c9d5ea; }
+    .card.active {
+      border-color: rgba(47, 111, 237, 0.45);
+      background: linear-gradient(180deg, #f7faff, #fff);
+      box-shadow: inset 0 0 0 1px rgba(47, 111, 237, 0.08);
+    }
+    .card.selected { outline: 2px solid rgba(47, 111, 237, 0.25); outline-offset: 1px; }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .title-wrap { min-width: 0; flex: 1; }
+    .name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #c5ced9;
+      flex: 0 0 auto;
+    }
+    .card.active .dot { background: var(--accent); }
+    .name {
+      font-size: 15px;
+      font-weight: 720;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(47, 111, 237, 0.12);
+      border-radius: 999px;
+      padding: 2px 8px;
+      flex: 0 0 auto;
+    }
+    .note {
+      margin: 5px 0 0 16px;
+      font-size: 12px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .balance {
+      text-align: right;
+      flex: 0 0 auto;
+      min-width: 96px;
+    }
+    .balance-val {
+      font-size: 16px;
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .balance-val.ok { color: var(--ok); }
+    .balance-val.err { color: var(--err); font-size: 12px; font-weight: 650; }
+    .balance-val.muted { color: var(--muted); font-size: 13px; font-weight: 650; }
+    .balance-lab { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 4px 8px;
+      margin: 10px 0 0 16px;
+      font-size: 12px;
+    }
+    .meta-grid .k { color: var(--muted); }
+    .meta-grid .v {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .acts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0 0 16px;
+    }
+    .models {
+      margin: 10px 0 0 16px;
+      border: 1px dashed #d7dee8;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+    .models-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .model-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 140px;
+      overflow: auto;
+    }
+    .chip {
+      border: 1px solid #d5dce7;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      font-size: 11px;
+      padding: 4px 9px;
+      cursor: pointer;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: rgba(47,111,237,.45); color: var(--accent); background: var(--accent-soft); }
+    .form {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 650;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field input, .field textarea {
+      width: 100%;
+      border: 1px solid #d7dee8;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      background: #fff;
+      font-family: inherit;
+    }
+    .field textarea { min-height: 64px; resize: vertical; }
+    .field input:focus, .field textarea:focus {
+      border-color: rgba(47, 111, 237, 0.55);
+      box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.12);
+    }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .hint { min-height: 18px; font-size: 12px; color: var(--muted); }
+    .hint.ok { color: var(--ok); }
+    .hint.err { color: var(--err); }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: rgba(28, 36, 48, 0.92);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 860px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Key 列表</h1>
+      <p>备注 · 站点 · 余额 · 模型支持 · 快捷选用 / 复制 · 糖果/鹈鹕测智提示词</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="copyCandy" type="button" title="复制糖果测试提示词（参考答案 21）">糖果测试</button>
+      <button class="btn" id="copyPelican" type="button" title="复制鹈鹕骑车 SVG 测试提示词">鹈鹕测试</button>
+      <button class="btn" id="refreshAll" type="button">刷新余额</button>
+      <button class="btn btn-primary" id="addNew" type="button">添加 Key</button>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <div class="panel-hd">
+        <h2>全部 Key</h2>
+        <span id="listCount">加载中…</span>
+      </div>
+      <div class="list" id="list">
+        <div class="empty">正在加载…</div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-hd">
+        <h2 id="formTitle">添加 Key</h2>
+        <span id="formMeta">新建并可选启用</span>
+      </div>
+      <div class="form">
+        <div class="field">
+          <label for="name">名称</label>
+          <input id="name" type="text" placeholder="如 OpenAI / 中转站" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="note">备注</label>
+          <textarea id="note" placeholder="用途说明，例如：日常主用 / 备用廉价站" spellcheck="false"></textarea>
+        </div>
+        <div class="field">
+          <label for="key">API Key</label>
+          <input id="key" type="password" placeholder="sk-... / 任意 Key" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="url">站点 / 端点</label>
+          <input id="url" type="url" placeholder="如 https://host/v1（可空 = 默认官方）" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary" id="save" type="button">添加</button>
+          <button class="btn" id="saveUse" type="button">添加并选用</button>
+          <button class="btn" id="reset" type="button">清空表单</button>
+        </div>
+        <div class="hint" id="formHint"></div>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="./keys.js"></script>
+</body>
+</html>
