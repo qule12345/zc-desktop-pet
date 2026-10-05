@@ -2,7 +2,7 @@
 
 独立 Electron 桌宠：常驻桌面，显示 API 余额与今日用量，支持多 Key、多皮肤（`.skin` 包）、拖拽吸附。
 
-ZC桌宠原创开源项目，MIT 协议。欢迎提 Issue / PR。
+ZC桌宠开源项目，MIT 协议。欢迎提 Issue / PR。
 
 ## 快速开始
 
