@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>成品广场 · ZC桌宠</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@380;500;600&display=optional" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./plaza.css">
+</head>
+<body class="plaza-body">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="veil" id="veil" aria-hidden="true"></div>
+
+  <header class="plaza-top">
+    <div class="plaza-brand">
+      <p class="kicker">ZC桌宠</p>
+      <h1>成品广场</h1>
+      <p class="lede">皮肤库与插件库。下载后在桌宠里导入，或到工坊继续改。</p>
+    </div>
+    <nav class="plaza-nav" aria-label="站点">
+      <a class="plaza-nav-on" href="./plaza.html">成品广场</a>
+      <a href="./index.html">ZC工坊</a>
+      <button type="button" class="plaza-nav-btn" id="openAuth">登录</button>
+      <button type="button" class="plaza-nav-btn" id="openAccount" hidden>账号</button>
+    </nav>
+  </header>
+
+  <aside class="plaza-secure" role="note">
+    <strong>安全说明</strong>
+    <span>服务端只存文件、不执行任何插件代码。上传需登录，通过审核后才会公开。工坊调试会在你浏览器里运行本地脚本。</span>
+  </aside>
+
+  <div class="plaza-tools">
+    <input type="search" id="searchInput" class="plaza-search" placeholder="搜索标题、作者、简介…" autocomplete="off">
+    <div class="plaza-cats" id="catBar" role="group" aria-label="分类"></div>
+  </div>
+
+  <div class="plaza-tabs" role="tablist">
+    <button type="button" class="plaza-tab on" data-tab="skins" role="tab" aria-selected="true">皮肤库</button>
+    <button type="button" class="plaza-tab" data-tab="plugins" role="tab" aria-selected="false">插件库</button>
+    <button type="button" class="plaza-tab" data-tab="review" role="tab" aria-selected="false" id="reviewTab" hidden>审核</button>
+    <button type="button" class="plaza-upload-btn" id="openUpload">上传</button>
+  </div>
+
+  <main class="plaza-main">
+    <section class="plaza-panel on" id="panelSkins" role="tabpanel">
+      <div class="plaza-grid" id="skinGrid"></div>
+      <p class="plaza-empty" id="skinEmpty" hidden>还没有皮肤，来当第一个上传的人。</p>
+    </section>
+    <section class="plaza-panel" id="panelPlugins" role="tabpanel" hidden>
+      <div class="plaza-grid" id="pluginGrid"></div>
+      <p class="plaza-empty" id="pluginEmpty" hidden>还没有插件。上传 .js 时可附带封面图。</p>
+    </section>
+    <section class="plaza-panel" id="panelReview" role="tabpanel" hidden>
+      <div class="plaza-queue" id="reviewQueue"></div>
+      <p class="plaza-empty" id="reviewEmpty" hidden>没有待审核条目。</p>
+    </section>
+  </main>
+
+  <dialog class="plaza-dialog" id="authDialog">
+    <form method="dialog" class="plaza-form" id="authForm">
+      <header class="plaza-form-head">
+        <h2>登录 / 注册</h2>
+        <button type="button" class="plaza-x" id="closeAuth" aria-label="关闭">×</button>
+      </header>
+      <label class="plaza-field">用户名
+        <input name="name" maxlength="24" required autocomplete="username" placeholder="2–24 字">
+      </label>
+      <label class="plaza-field">密码
+        <input name="password" type="password" minlength="8" required autocomplete="current-password" placeholder="至少 8 位">
+      </label>
+      <p class="plaza-form-note">第一个注册的用户会成为管理员（若服务器未配置 ADMIN_NAME）。</p>
+      <p class="status" id="authStatus"></p>
+      <footer class="plaza-form-actions">
+        <button type="button" class="ghost" id="doRegister">注册</button>
+        <button type="button" class="primary" id="doLogin">登录</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="plaza-dialog" id="accountDialog">
+    <form method="dialog" class="plaza-form">
+      <header class="plaza-form-head">
+        <h2>账号</h2>
+        <button type="button" class="plaza-x" id="closeAccount" aria-label="关闭">×</button>
+      </header>
+      <p class="plaza-form-note" id="accountMeta"></p>
+      <label class="plaza-field">上传令牌
+        <input id="myToken" readonly autocomplete="off">
+      </label>
+      <p class="plaza-form-note">登录 Cookie 即可上传；也可用请求头 <code>X-Upload-Token</code>。不要发给别人。</p>
+      <p class="status" id="accountStatus"></p>
+      <footer class="plaza-form-actions">
+        <button type="button" class="ghost" id="copyToken">复制令牌</button>
+        <button type="button" class="ghost" id="rotateToken">更换令牌</button>
+        <button type="button" class="primary" id="doLogout">退出</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="plaza-dialog" id="uploadDialog">
+    <form method="dialog" id="uploadForm" class="plaza-form">
+      <header class="plaza-form-head">
+        <h2>上传到广场</h2>
+        <button type="button" class="plaza-x" id="closeUpload" aria-label="关闭">×</button>
+      </header>
+
+      <div class="plaza-kind">
+        <label><input type="radio" name="kind" value="skin" checked> 皮肤 · .skin</label>
+        <label><input type="radio" name="kind" value="plugin"> 插件 · .js / .zip</label>
+      </div>
+
+      <label class="plaza-field">标题
+        <input name="title" maxlength="64" required placeholder="例如：秋日柑橘" autocomplete="off">
+      </label>
+      <label class="plaza-field">作者
+        <input name="author" maxlength="32" placeholder="昵称" autocomplete="nickname">
+      </label>
+      <label class="plaza-field">分类
+        <select name="category" id="uploadCategory"></select>
+      </label>
+      <label class="plaza-field">简介
+        <textarea name="description" maxlength="500" rows="3" placeholder="一两句说明"></textarea>
+      </label>
+      <label class="plaza-field">文件
+        <input type="file" name="file" id="fileInput" required>
+      </label>
+      <label class="plaza-field" id="coverField" hidden>封面图（插件可选）
+        <input type="file" name="cover" id="coverInput" accept="image/png,image/jpeg,image/webp,image/gif">
+      </label>
+
+      <p class="plaza-form-note" id="formNote">需登录。普通用户提交后进入审核队列，通过后才会公开。</p>
+      <p class="status" id="uploadStatus"></p>
+
+      <footer class="plaza-form-actions">
+        <button type="button" class="ghost" id="cancelUpload">取消</button>
+        <button type="button" class="primary" id="submitUpload">提交审核</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script src="./plaza.js"></script>
+</body>
+</html>

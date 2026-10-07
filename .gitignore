@@ -6,4 +6,8 @@ dist/
 .env.*
 userdata.json
 build/electron-dist/
-skin-studio/
+
+# 工坊站点：忽略运行数据与依赖，源码入库
+skin-studio/server/node_modules/
+skin-studio/server/data/*
+!skin-studio/server/data/.gitkeep

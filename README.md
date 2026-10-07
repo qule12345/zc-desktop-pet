@@ -49,6 +49,28 @@ npx electron . --smoke
 
 开发模式下数据同样写到项目目录的 `userdata.json`。
 
+## ZC工坊 / 成品广场（网站）
+
+在线示例：<https://zc.qile.chat/>（成品广场：[/plaza.html](https://zc.qile.chat/plaza.html)）
+
+源码目录：`skin-studio/`（皮肤制作工坊 + 广场上传/审核）。
+
+```bash
+cd skin-studio/server
+npm install
+# 建议生产环境：
+# export ADMIN_NAME=你的管理员
+# export ADMIN_PASS=至少8位
+# export UPLOAD_TOKEN=可选主令牌
+# export SESSION_SECRET=长随机串
+export PORT=5188
+npm start
+```
+
+浏览器打开 `http://127.0.0.1:5188/plaza.html`。Nginx 反代到该端口时，建议 `index` 设为 `plaza.html`，或把 `/` 也反代到 Node（Node 会把 `/` 重定向到广场）。
+
+勿提交 `skin-studio/server/data/`（用户、会话、上传文件）；`fixtures/`、`sfx/` 为工坊示例素材，需一并部署。
+
 ## 构建
 
 ### Windows 便携 EXE

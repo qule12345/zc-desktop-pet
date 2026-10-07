@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ZC工坊 · ZC桌宠皮肤</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@380;500;600&display=optional" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./plaza.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" hidden aria-hidden="true"></div>
+  <div class="veil" id="veil" aria-hidden="true"></div>
+  <div class="burst-overlay" id="burstOverlay" hidden>
+    <img id="burstPreview" alt="连点彩蛋预览">
+  </div>
+
+  <div class="shell">
+    <section class="stage-col" id="stageCol">
+      <header class="stage-head">
+        <div class="stage-head-row">
+          <div>
+            <p class="kicker">ZC桌宠</p>
+            <h1>ZC工坊</h1>
+          </div>
+          <nav class="plaza-nav" aria-label="站点">
+            <a href="./plaza.html">成品广场</a>
+            <a class="plaza-nav-on" href="./index.html">ZC工坊</a>
+          </nav>
+        </div>
+        <p class="lede">为桌宠做一件皮肤。立绘、音效、已有 .skin 都可以拖进来。</p>
+        <p class="secure-banner" role="note">插件脚本在<strong>本机浏览器</strong>运行，可读写本页存储、改页面 DOM。只调试自己写的或信任的代码；广场下载的陌生插件请先审阅再加载。</p>
+      </header>
+
+      <div class="stage" id="stage">
+        <div class="light" aria-hidden="true"></div>
+        <div class="desk-clock" id="clock">12:00</div>
+        <div class="empty" id="emptyHint">
+          <span>把立绘、音效或 .skin 拖到这里</span>
+        </div>
+        <div class="speech" id="previewBubble">
+          <div class="speech-art" id="bubbleArt">
+            <svg viewBox="0 0 1026 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <path class="bshape" fill="#fff" stroke-width="18" stroke-linejoin="round" d="M 827 248 A 373 232 0 1 0 81 246 A 373 232 0 0 0 301 465 A 57 32 10 0 0 413 484 A 373 232 0 0 0 827 248 Z"/>
+              <ellipse cx="352" cy="561" rx="37.5" ry="26" fill="#fff" stroke-width="18"/>
+              <ellipse cx="442" cy="646" rx="24.5" ry="18" fill="#fff" stroke-width="18"/>
+            </svg>
+          </div>
+          <div class="speech-text">
+            <div class="a" id="pbA">ZC桌宠 余额</div>
+            <div class="b" id="pbB">¥ 12.34</div>
+            <div class="c" id="pbC">今日已用 —</div>
+          </div>
+        </div>
+        <img class="pet" id="previewPet" alt="桌宠预览">
+        <canvas class="pet-draw" id="previewCanvas" width="512" height="512" aria-label="插件绘制层"></canvas>
+        <button type="button" class="stage-menu-btn" id="stageMenuBtn" title="菜单" aria-label="打开设置菜单" aria-expanded="false" aria-controls="stageMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="plinth" aria-hidden="true"></div>
+      </div>
+
+      <div class="stage-menu" id="stageMenu" hidden aria-hidden="true" inert>
+        <div class="stage-menu-page" id="stageMenuMain">
+          <div class="stage-menu-title" id="stageMenuTitle">设置</div>
+          <div class="stage-menu-section">外观</div>
+          <div class="stage-menu-row">
+            <span class="stage-menu-lab">音效</span>
+            <select class="stage-menu-select" id="stageSoundSelect" aria-label="音效套装"></select>
+          </div>
+          <div class="stage-menu-row stage-menu-toggle">
+            <span class="stage-menu-lab">气泡</span>
+            <input type="checkbox" class="stage-menu-check" id="stageBubbleToggle" checked aria-label="显示气泡">
+          </div>
+          <div class="stage-menu-row stage-menu-toggle">
+            <span class="stage-menu-lab">悬浮音</span>
+            <input type="checkbox" class="stage-menu-check" id="stageHoverToggle" checked aria-label="悬浮音效">
+          </div>
+          <div class="stage-menu-row stage-menu-toggle">
+            <span class="stage-menu-lab">连点效果</span>
+            <input type="checkbox" class="stage-menu-check" id="stageBurstToggle" checked aria-label="连点效果">
+          </div>
+          <div class="stage-menu-sep"></div>
+          <div class="stage-menu-section">插件</div>
+          <div class="stage-menu-mods" id="stageMenuMods">
+            <p class="stage-menu-empty" id="stageMenuEmpty">加载带 menu.button 的插件后出现在这里</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-bar" id="simBar">
+        <button type="button" class="ghost" id="simBurst">模拟连点</button>
+        <button type="button" class="ghost" id="btnExample">载入示例</button>
+        <span id="simHint">三条杠=菜单 · 按住=按下 · 移入=悬浮</span>
+      </div>
+      <p class="caption" id="caption">按住角色看按压态 · PNG / WebP / JPEG / GIF / SVG / AVIF · 音视频 · .skin</p>
+    </section>
+
+    <aside class="dock">
+      <div class="dock-bar">
+        <button type="button" class="ghost" id="btnImport">打开</button>
+        <button type="button" class="ghost" id="btnNew">新建</button>
+        <button type="button" class="primary magnetic" id="btnExport">导出皮肤</button>
+        <input id="importFile" type="file" accept=".skin,.zip,application/zip" hidden>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <nav class="chapters" aria-label="章节" role="tablist">
+        <button type="button" class="on" data-ch="id" role="tab" aria-selected="true">01 身份</button>
+        <button type="button" data-ch="art" role="tab" aria-selected="false">02 立绘</button>
+        <button type="button" data-ch="sound" role="tab" aria-selected="false">03 音效</button>
+        <button type="button" data-ch="color" role="tab" aria-selected="false">04 色彩</button>
+        <button type="button" data-ch="voice" role="tab" aria-selected="false">05 台词</button>
+        <button type="button" data-ch="mod" role="tab" aria-selected="false">06 插件</button>
+      </nav>
+
+      <div class="panels">
+        <section class="panel on" data-ch="id">
+          <h2>身份</h2>
+          <div class="field"><label>ID</label><input id="id" type="text" value="mypet" spellcheck="false"></div>
+          <div class="field"><label>列表名</label><input id="label" type="text" value="我的皮肤"></div>
+          <div class="field"><label>品牌</label><input id="brand" type="text" value="ZC桌宠"></div>
+          <div class="field"><label>余额标题</label><input id="balanceTitle" type="text" placeholder="默认：品牌 + 余额"></div>
+        </section>
+
+        <section class="panel" data-ch="art">
+          <h2>立绘</h2>
+          <div class="drops">
+            <div class="field"><label>待机</label><div class="drop" data-slot="idle"><span class="hint">图</span><input type="file" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.gif,.bmp,.svg,.avif,.ico,.apng"></div></div>
+            <div class="field"><label>按压</label><div class="drop" data-slot="press"><span class="hint">可选</span><input type="file" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.gif,.bmp,.svg,.avif,.ico,.apng"></div></div>
+            <div class="field"><label>气泡动图</label><div class="drop" data-slot="gif"><span class="hint">GIF / WebP</span><input type="file" accept="image/gif,image/webp,image/png,image/apng,.gif,.webp,.png,.apng"></div></div>
+            <div class="field"><label>连点彩蛋</label><div class="drop" data-slot="burst"><span class="hint">可选</span><input type="file" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.gif,.bmp,.svg,.avif,.ico,.apng"></div></div>
+          </div>
+          <div class="field"><label>连点次数</label><input id="burstClicks" type="number" min="0" step="1" value="0"></div>
+          <div class="field"><label>气泡外形 · SVG / HTML</label>
+            <textarea id="bubbleMarkup" rows="5" placeholder="粘贴 SVG 或 HTML，不填则用默认气泡"></textarea>
+          </div>
+          <div class="field"><label>气泡外形文件</label><div class="drop" data-slot="bubbleArt"><span class="hint">svg / html</span><input type="file" accept=".svg,.html,.xml,image/svg+xml,text/html"></div></div>
+        </section>
+
+        <section class="panel" data-ch="sound">
+          <h2>音效</h2>
+          <p class="note">按下 / 抬起 / 悬浮会进气泡菜单的音效列表。连点音在连点彩蛋触发时播放。</p>
+          <div class="row2">
+            <div class="field"><label>菜单套装名</label><input id="customSoundLabel" type="text" value="自定义"></div>
+            <div class="field"><label>通用音效</label>
+              <select id="packSounds"><option value="yes">小黄鸭 + 音效1</option><option value="no">不打包</option></select>
+            </div>
+          </div>
+          <div class="drops">
+            <div class="field"><label>按下</label><div class="drop" data-slot="tapPress"><span class="hint">音 / 视频</span><input type="file" accept="audio/*,video/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.webm,.mp4,.mov"></div></div>
+            <div class="field"><label>抬起</label><div class="drop" data-slot="tapRelease"><span class="hint">音 / 视频</span><input type="file" accept="audio/*,video/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.webm,.mp4,.mov"></div></div>
+            <div class="field"><label>悬浮</label><div class="drop" data-slot="tapHover"><span class="hint">音 / 视频</span><input type="file" accept="audio/*,video/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.webm,.mp4,.mov"></div></div>
+            <div class="field"><label>连点</label><div class="drop" data-slot="burstSound"><span class="hint">音 / 视频</span><input type="file" accept="audio/*,video/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.webm,.mp4,.mov"></div></div>
+          </div>
+        </section>
+
+        <section class="panel" data-ch="color">
+          <h2>色彩</h2>
+          <p class="note">上传立绘后，会从像素里抽一版建议色。仍可手调。</p>
+          <div class="swatches" id="swatches"></div>
+          <div class="field"><label>描边</label><div class="inline"><input id="stroke" type="color" value="#203170"><input id="strokeHex" type="text" value="#203170" spellcheck="false"></div></div>
+          <div class="field"><label>正文</label><div class="inline"><input id="text" type="color" value="#536ba9"><input id="textHex" type="text" value="#536ba9" spellcheck="false"></div></div>
+          <div class="field"><label>弱化</label><div class="inline"><input id="hint" type="color" value="#9fb0d9"><input id="hintHex" type="text" value="#9fb0d9" spellcheck="false"></div></div>
+          <div class="field"><label>强调</label><div class="inline"><input id="accent" type="color" value="#3d5a80"><input id="accentHex" type="text" value="#3d5a80" spellcheck="false"></div></div>
+        </section>
+
+        <section class="panel" data-ch="voice">
+          <h2>台词</h2>
+          <div class="bubbles" id="bubbles"></div>
+          <button type="button" class="ghost" id="addBubble">再加一组</button>
+        </section>
+
+        <section class="panel" data-ch="mod">
+          <h2>插件</h2>
+          <p class="note">脚本随皮肤导出。舞台会实时预览；桌宠里切换到这套皮肤才会正式加载。可多文件、可内联、可带 CSS 和 JSON 数据。</p>
+
+          <div class="mod-split">
+            <div class="field">
+              <label>脚本文件 · js / mjs</label>
+              <div class="drop tall" data-slot="plugins"><span class="hint">拖入或点选，可多选</span><input type="file" accept=".js,.mjs,text/javascript" multiple></div>
+              <ul class="plug-list" id="pluginList"></ul>
+              <div class="mod-acts">
+                <button type="button" class="ghost" id="clearPlugins">清空脚本</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>样式文件 · css</label>
+              <div class="drop tall" data-slot="modCss"><span class="hint">skin.css / 任意 css</span><input type="file" accept=".css,text/css"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>内联脚本</label>
+            <textarea id="pluginInline" class="code" rows="8" spellcheck="false" placeholder="ZC.register({&#10;  onLoad(api) {},&#10;  onTick(dt, api) {},&#10;  drawPet(ctx, api) {},&#10;  drawBubble(el, api) {}&#10;})&#10;api.on('press', () => {})"></textarea>
+          </div>
+          <div class="field">
+            <label>附加数据 · JSON → api.data</label>
+            <textarea id="pluginData" class="code" rows="4" spellcheck="false" placeholder='{ "key": "value" }'></textarea>
+          </div>
+
+          <h3 class="subh">生命周期</h3>
+          <div class="api-grid">
+            <article class="api-card"><strong>onLoad</strong><span>皮肤就绪，拿到 api</span></article>
+            <article class="api-card"><strong>onTick</strong><span>每帧 dt 秒</span></article>
+            <article class="api-card"><strong>drawPet</strong><span>立绘 canvas 2d</span></article>
+            <article class="api-card"><strong>drawBubble</strong><span>气泡外形节点</span></article>
+            <article class="api-card"><strong>onUnload</strong><span>换肤或卸包</span></article>
+            <article class="api-card"><strong>onReady</strong><span>脚本全部载入后</span></article>
+          </div>
+
+          <h3 class="subh">事件 · api.on / 同名钩子</h3>
+          <div class="chip-wrap">
+            <span>press</span><span>release</span><span>hoverenter</span><span>hoverleave</span>
+            <span>burst</span><span>pose</span><span>tick</span><span>render</span>
+            <span>bubbleopen</span><span>bubbleclose</span><span>skin</span>
+            <span>menuopen</span><span>menuclose</span><span>load</span><span>unload</span><span>ready</span>
+          </div>
+
+          <h3 class="subh">api 上能拿到的</h3>
+          <div class="api-grid dense">
+            <article class="api-card"><strong>节点</strong><span>root body img canvas bubble menu</span></article>
+            <article class="api-card"><strong>资源</strong><span>asset(name) whale store css()</span></article>
+            <article class="api-card"><strong>状态</strong><span>skin skinId data extra</span></article>
+            <article class="api-card"><strong>动作</strong><span>setPose setImg setScale showBubble hideBubble playPress playRelease</span></article>
+          </div>
+          <p class="note">也可放 plugin.js / mod.js / draw.js / mods/*.js。skin.json 未占用字段会进 api.extra。菜单可用 api.menu.add / api.menu.button。</p>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <script src="./zip.js"></script>
+  <script src="./mod-host.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
